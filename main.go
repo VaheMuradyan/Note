@@ -15,9 +15,8 @@ import (
 )
 
 type Note struct {
-	ID      primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Changed bool               `json:"changed"`
-	Body    string             `json:"body"`
+	ID   primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Body string             `json:"body"`
 }
 
 var collection *mongo.Collection
@@ -25,9 +24,11 @@ var collection *mongo.Collection
 func main() {
 	fmt.Println("Hello world")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file:", err)
+	if os.Getenv("ENV") != "production" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal("Error loading .env file:", err)
+		}
 	}
 
 	MONGODB_URI := os.Getenv("MONGODB_URI")
@@ -47,19 +48,27 @@ func main() {
 
 	fmt.Println("Connected to Mongodb ATLAS")
 
-	collection = client.Database("golang_db").Collection("notes")
+	collection = client.Database("golang_db").Collection("my_notes")
 
 	app := fiber.New()
 
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins: "http://localhost:5173",
+	// 	AllowHeaders: "Origin,Content-Type,Accept",
+	// }))
+
 	app.Get("/api/notes", getNotes)
 	app.Post("/api/notes", createNote)
-	app.Patch("/api/notes/:id", updateNote)
 	app.Delete("/api/notes/:id", deleteNote)
 
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		port = "5000"
+	}
+
+	if os.Getenv("ENV") == "production" {
+		app.Static("/", "./client/dist")
 	}
 
 	log.Fatal(app.Listen("0.0.0.0:" + port))
@@ -107,27 +116,6 @@ func createNote(c *fiber.Ctx) error {
 	note.ID = insertResult.InsertedID.(primitive.ObjectID)
 
 	return c.Status(201).JSON(note)
-}
-
-func updateNote(c *fiber.Ctx) error {
-	id := c.Params("id")
-
-	objectId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Ivalid note ID"})
-	}
-
-	filter := bson.M{"_id": objectId}
-	update := bson.M{"$set": bson.M{"changed": true}}
-
-	_, err = collection.UpdateOne(context.Background(), filter, update)
-
-	if err != nil {
-		return err
-	}
-
-	return c.Status(200).JSON(fiber.Map{"success": true})
 }
 
 func deleteNote(c *fiber.Ctx) error {

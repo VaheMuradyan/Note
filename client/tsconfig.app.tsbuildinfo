@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/chakra/theme.ts","./src/components/navbar.tsx","./src/components/noteform.tsx","./src/components/noteitem.tsx","./src/components/notelist.tsx"],"version":"5.6.2"}
