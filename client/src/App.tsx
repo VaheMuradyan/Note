@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import NoteForm from './components/NoteForm'
 import NoteList from './components/NoteList'
 
-export const BASE_URL = "http://localhost:5000/api";
+export const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "/api";
 
 function App() {
 
@@ -14,7 +14,6 @@ function App() {
         <NoteForm />
         <NoteList />
       </Container>
-     
     </Stack>
   )
 }

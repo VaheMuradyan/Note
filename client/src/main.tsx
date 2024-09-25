@@ -8,12 +8,13 @@ import theme from './chakra/theme.ts'
 
 
 const queryClient = new QueryClient();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-    <ChakraProvider theme={theme}>
-    <App />
-    </ChakraProvider>
+      <ChakraProvider theme={theme}>
+        <App />
+      </ChakraProvider>
     </QueryClientProvider>
   </StrictMode>,
 )
